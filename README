@@ -1,0 +1,30 @@
+Simplified PUB/SUB with node.js:
+
+- Binds into a redis channel called PUBSUB:COMET
+- send everything received by this channel straight to connected users
+- used COMET as transport
+
+test with curl or any browser (some browsers as safari and chrome has a minimum buffer to fill before showing comet data)
+
+start redis and run pubsub_comet:
+$ node pubsub_comet.js
+
+in another term
+$ curl http://localhost:8080/subscribe
+
+now publish messages to redis:
+
+$ redis-cli
+> PUBLISH PUBSUB:COMET hello
+
+check curl's output and note that the connection still there.
+
+also, use publisher.js to test a stream of search results from twitter to your users.
+
+$ node publisher.js
+
+if you keep getting too many open files error, try: 
+$ launchctl limit maxfiles 1000000 1000000
+
+gleicon - 2010 - http://zenmachine.wordpress.com | http://github.com/gleicon
+
