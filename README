@@ -23,8 +23,30 @@ also, use publisher.js to test a stream of search results from twitter to your u
 
 $ node publisher.js
 
+--------
+Exploratory testbed using comet_test.js
+
+comet_test.js has the same URL scheme, but exposes a /publish url so you can use curl as:
+
+$ node comet_test.js
+
+in other terminal
+$ curl -X POST -d 'body=test' http://localhost:8080/publish to send data instead of redis.
+
+
+---------
 if you keep getting too many open files error, try: 
 $ launchctl limit maxfiles 1000000 1000000
+
+In Linux, try:
+$ sudo bash
+# ulimit -n 999999
+
+you can check with both strace (linux) and dtruss (mac os X) if your node.js binary is using epoll and kevent (kqueue) respectively. Select will balk on 1024 clients on mac.
+
+
+The tests/ folder carries assorted testes made in different languages. Try comet_cont.py opening 5k clients each time (simulating a ramp up).
+chatter.js is intended to be a real chat simulation.
 
 gleicon - 2010 - http://zenmachine.wordpress.com | http://github.com/gleicon
 

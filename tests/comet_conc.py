@@ -19,6 +19,6 @@ class CometClient(object):
 
 if __name__ == "__main__":
     log.startLogging(sys.stdout)
-    for a in range(1, 500):
+    for a in range(1, 1000):
         client.downloadPage("http://localhost:8080/subscribe", CometClient(a))
     reactor.run()

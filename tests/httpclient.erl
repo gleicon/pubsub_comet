@@ -1,12 +1,13 @@
 -module(httpclient).
--export([start/2, timer/2, recv/1]).
+-export([start/3, timer/2, recv/1]).
 
-start(Filename, Wait) ->
+start(Url, Wait, MaxConn) ->
     inets:start(),
     spawn(?MODULE, timer, [10000, self()]),
     This = self(),
-    spawn(fun()-> loadurls(Filename, fun(U) -> This ! {loadurl, U} end, Wait) end),
-    recv({0,0,0}).
+    spawn(fun()-> loadurls(Url, MaxConn, 
+            fun(U) -> This ! {loadurl, U} end, Wait) end),
+            recv({0,0,0}).
 
 stop() ->
     inets:stop().
@@ -42,26 +43,9 @@ timer(T, Who) ->
 
 % Read lines from a file with a specified delay between lines:
 
-for_each_line_in_file(Name, Proc, Mode, Accum0) ->
-    {ok, Device} = file:open(Name, Mode),
-    for_each_line(Device, Proc, Accum0).
+for_each(MaxConn, _Callback, _Url) when MaxConn == 0 -> [];
+for_each(MaxConn, Callback, Url) -> Callback(Url), for_each(MaxConn -1, Callback, Url).
 
-for_each_line(Device, Proc, Accum) ->
-    case io:get_line(Device, "") of
-	eof  -> file:close(Device), Accum;
-	Line -> NewAccum = Proc(Line, Accum),
-		    for_each_line(Device, Proc, NewAccum)
-    end.
-
-loadurls(Filename, Callback, Wait) ->
-    for_each_line_in_file(Filename, 
-			  fun(Line, List) ->
-				  Callback(string:strip(Line, right, $\n)),
-				  receive
-				      after Wait ->
-					      noop
-				      end,
-				  List
-			  end,
-			  [read], []).
+loadurls(Url, MaxConn, Callback, _Wait) ->
+    for_each(MaxConn, Callback, Url).
 
